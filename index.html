@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
 
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
@@ -13,24 +16,21 @@
   --card:#ffffff;
   --panel:#e0f2fe;
   --text:#0f172a;
-  --btn:#93c5fd;
-  --btnText:#020617;
-  --top1:#60a5fa;
-  --top2:#38bdf8;
+  --accent:#3b82f6;
+  --light:#e0f2fe;
   --danger:#ef4444;
+  --success:#22c55e;
 }
 .dark{
   --bg:#020617;
   --card:#0f172a;
   --panel:#1e293b;
   --text:#e5e7eb;
-  --btn:#334155;
-  --btnText:#e5e7eb;
-  --top1:#1e293b;
-  --top2:#020617;
+  --light:#1e293b;
 }
 *{box-sizing:border-box;font-family:system-ui}
-body{margin:0;background:var(--bg);color:var(--text);transition:.3s}
+body{margin:0;background:var(--bg);color:var(--text)}
+.hidden{display:none}
 
 /* LOGIN */
 .login{
@@ -47,7 +47,7 @@ body{margin:0;background:var(--bg);color:var(--text);transition:.3s}
 }
 .login-box button{
   width:100%;padding:14px;border:none;border-radius:12px;
-  background:#60a5fa;color:white;font-size:18px
+  background:var(--accent);color:white;font-size:18px
 }
 
 /* SIDEBAR */
@@ -59,48 +59,67 @@ body{margin:0;background:var(--bg);color:var(--text);transition:.3s}
 .sidebar.show{transform:translateX(0)}
 .sidebar button{
   width:100%;padding:12px;margin:8px 0;border:none;
-  border-radius:12px;background:var(--btn);
-  color:var(--btnText);font-size:16px;text-align:left
+  border-radius:12px;background:var(--light);
+  font-size:16px;text-align:left
 }
-
-/* TOGGLE */
 .toggle{
   margin-top:20px;padding:12px;border-radius:12px;
-  background:var(--btn);display:flex;justify-content:space-between
+  background:var(--light);display:flex;justify-content:space-between
 }
-
-/* OVERLAY */
 #overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.4);
   opacity:0;pointer-events:none;transition:.3s;z-index:15
 }
 #overlay.show{opacity:1;pointer-events:auto}
 
-.hidden{display:none}
-
 /* TOPBAR */
 .topbar{
   display:flex;align-items:center;gap:10px;
   padding:14px 16px;
-  background:linear-gradient(135deg,var(--top1),var(--top2));
+  background:linear-gradient(135deg,#60a5fa,#38bdf8);
   color:white
 }
 .menu{font-size:26px;cursor:pointer}
 .topbar h3{flex:1;text-align:center;margin:0}
 
-/* PAGES */
+/* PAGE */
 .page{display:none;padding:20px}
 .page.active{display:block}
 
-/* CARDS */
-.card{
-  background:var(--card);padding:22px;border-radius:20px;
-  margin-bottom:20px
+/* HOME CARDS */
+.stat-card{
+  background:var(--light);
+  padding:18px;border-radius:18px;
+  margin-bottom:16px;cursor:pointer
 }
-.badge{
-  background:var(--danger);color:white;
-  padding:2px 8px;border-radius:20px;font-size:12px
+.stat-head{
+  display:flex;justify-content:space-between;align-items:center
 }
+.big-num{font-size:34px;font-weight:800;color:var(--accent)}
+.sub{opacity:.7}
+.icon{transition:.3s}
+.rotate{transform:rotate(180deg)}
+
+.table-wrap{
+  max-height:200px;overflow:auto;margin-top:12px
+}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;border-bottom:1px solid #cbd5f5;font-size:14px;text-align:left}
+th{font-weight:700}
+
+/* VISITORS */
+.visitor-card{
+  background:var(--light);
+  padding:18px;border-radius:18px;
+  margin-bottom:16px
+}
+.btn{
+  padding:6px 10px;border:none;border-radius:8px;
+  margin-right:6px;cursor:pointer
+}
+.block{background:#facc15}
+.unblock{background:var(--success);color:white}
+.delete{background:var(--danger);color:white}
 </style>
 </head>
 
@@ -116,15 +135,13 @@ body{margin:0;background:var(--bg);color:var(--text);transition:.3s}
   </div>
 </div>
 
-<!-- SIDEBAR -->
+<!-- APP -->
+<div id="app" class="hidden">
+
 <div class="sidebar" id="sidebar">
   <button onclick="openPage('home')">🏠 Home</button>
-  <button onclick="openPage('pending')">
-    ⏳ Pending <span class="badge" id="pendingCount">0</span>
-  </button>
-  <button onclick="openPage('approved')">✅ Approved</button>
+  <button onclick="openPage('visitors')">👥 Visitors</button>
   <button onclick="logout()">🚪 Logout</button>
-
   <div class="toggle">
     <span>🌙 Dark Mode</span>
     <input type="checkbox" id="darkToggle">
@@ -132,71 +149,75 @@ body{margin:0;background:var(--bg);color:var(--text);transition:.3s}
 </div>
 <div id="overlay"></div>
 
-<!-- APP -->
-<div class="hidden" id="app">
-  <div class="topbar">
-    <span class="menu" onclick="toggleSidebar()">☰</span>
-    <h3 id="title">Home</h3>
-  </div>
+<div class="topbar">
+  <span class="menu" onclick="toggleSidebar()">☰</span>
+  <h3 id="title">Home</h3>
+</div>
 
-  <div class="page" id="home">
-    <div class="card">
-      <h2>Hello, Aayush 👋</h2>
-      <p>Admin Dashboard</p>
-      <p><b>Date:</b> <span id="date"></span></p>
-      <p><b>Time:</b> <span id="time"></span></p>
+<!-- HOME -->
+<div class="page active" id="home">
+  <h2>Hello, Aayush 👋</h2>
+  <p id="dateTime"></p>
+
+  <div class="stat-card" onclick="toggleCard('blockedBox','icon1')">
+    <div class="stat-head">
+      <div>
+        <div class="big-num" id="blockedCount">0</div>
+        <div class="sub">Blocked Users</div>
+      </div>
+      <i id="icon1" class="fa-solid fa-chevron-down icon"></i>
     </div>
+    <div class="table-wrap hidden" id="blockedBox"></div>
   </div>
 
-  <div class="page" id="pending"></div>
+  <div class="stat-card" onclick="toggleCard('totalBox','icon2')">
+    <div class="stat-head">
+      <div>
+        <div class="big-num" id="totalCount">0</div>
+        <div class="sub">Total Users</div>
+      </div>
+      <i id="icon2" class="fa-solid fa-chevron-down icon"></i>
+    </div>
+    <div class="table-wrap hidden" id="totalBox"></div>
+  </div>
 
-  <div class="page" id="approved"></div>
+  <div class="stat-card">
+    <div class="sub">Active Users</div>
+    <div class="table-wrap" id="activeBox"></div>
+  </div>
+</div>
+
+<!-- VISITORS -->
+<div class="page" id="visitors"></div>
+
 </div>
 
 <script type="module">
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import {
-  getDatabase, ref, onValue, set, remove
-} from
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove, update } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 /* FIREBASE */
-const firebaseConfig={
+const fb=initializeApp({
   apiKey:"AIzaSyAht7TWN8NlbICl0VbEIuc19Mri7oPlXvc",
   databaseURL:"https://home-automation-89830-default-rtdb.firebaseio.com"
-};
-const fbApp=initializeApp(firebaseConfig);
-const db=getDatabase(fbApp);
-
-/* DOM */
-const loginPage=document.getElementById("loginPage");
-const app=document.getElementById("app");
-const sidebar=document.getElementById("sidebar");
-const overlay=document.getElementById("overlay");
-const title=document.getElementById("title");
-const darkToggle=document.getElementById("darkToggle");
-const pendingCount=document.getElementById("pendingCount");
-const pendingPage=document.getElementById("pending");
-const approvedPage=document.getElementById("approved");
+});
+const db=getDatabase(fb);
 
 /* LOGIN */
 window.login=()=>{
   if(adminId.value==="aayush" && adminPass.value==="Aayush@1982"){
-    loginPage.classList.add("hidden");
+    loginPage.style.display="none";
     app.classList.remove("hidden");
-    openPage("home");
+    history.pushState({page:"home"},"","");
   }else alert("Invalid login");
 };
 window.logout=()=>location.reload();
 
-/* NAV */
-window.openPage=id=>{
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  title.innerText=id.charAt(0).toUpperCase()+id.slice(1);
-  sidebar.classList.remove("show");
-  overlay.classList.remove("show");
+/* PREVENT EXIT – ALWAYS GO HOME */
+window.onpopstate=()=>{
+  openPage("home");
+  history.pushState({page:"home"},"","");
 };
 
 /* SIDEBAR */
@@ -204,74 +225,133 @@ window.toggleSidebar=()=>{
   sidebar.classList.toggle("show");
   overlay.classList.toggle("show");
 };
-overlay.onclick=toggleSidebar;
+function closeSidebar(){
+  sidebar.classList.remove("show");
+  overlay.classList.remove("show");
+}
+overlay.onclick=closeSidebar;
+
+/* NAV */
+window.openPage=id=>{
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  title.innerText=id.charAt(0).toUpperCase()+id.slice(1);
+  closeSidebar();
+};
+
+/* DATE & TIME */
+setInterval(()=>{
+  dateTime.innerText=new Date().toLocaleString("en-IN");
+},1000);
+
+/* TOGGLE CARD */
+window.toggleCard=(box,icon)=>{
+  document.getElementById(box).classList.toggle("hidden");
+  document.getElementById(icon).classList.toggle("rotate");
+  closeSidebar();
+};
+
+/* DATA */
+onValue(ref(db,"visitors"),snap=>{
+  let total=0,blocked=0;
+  let bHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
+  let tHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
+  let aHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
+  let vHTML="";
+  let i=1,j=1,k=1;
+
+  snap.forEach(c=>{
+    const d=c.val();
+    total++;
+    tHTML+=`<tr><td>${j++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+    if(d.blocked){
+      blocked++;
+      bHTML+=`<tr><td>${i++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+    }else{
+      aHTML+=`<tr><td>${k++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+    }
+
+    const dt=d.lastVisit?new Date(d.lastVisit).toLocaleString("en-IN"):"—";
+
+    vHTML+=`
+      <div class="visitor-card">
+        <b>${d.name}</b> (${d.phone})<br>
+        Visits: ${d.visits||1}<br>
+        Last Visit: ${dt}<br>
+        Status: ${d.blocked?"Blocked":"Active"}<br><br>
+        <button class="btn ${d.blocked?'unblock':'block'}"
+          onclick="toggleBlock('${d.phone}',${d.blocked})">
+          ${d.blocked?'Unblock':'Block'}
+        </button>
+        <button class="btn delete" onclick="deleteUser('${d.phone}')">Delete</button>
+      </div>`;
+  });
+
+  blockedCount.innerText=blocked;
+  totalCount.innerText=total;
+  blockedBox.innerHTML=bHTML+`</table>`;
+  totalBox.innerHTML=tHTML+`</table>`;
+  activeBox.innerHTML=aHTML+`</table>`;
+  visitors.innerHTML=vHTML;
+});
+
+/* BLOCK / DELETE */
+window.toggleBlock=(phone,isBlocked)=>{
+  update(ref(db,"visitors/"+phone),{blocked:!isBlocked});
+  closeSidebar();
+};
+window.deleteUser=phone=>{
+  if(confirm("Delete user permanently?")){
+    remove(ref(db,"visitors/"+phone));
+    remove(ref(db,"users/"+phone));
+  }
+};
 
 /* DARK MODE */
-if(localStorage.theme==="dark"){
+if(localStorage.adminTheme==="dark"){
   document.body.classList.add("dark");
   darkToggle.checked=true;
 }
 darkToggle.onchange=()=>{
   document.body.classList.toggle("dark");
-  localStorage.theme=document.body.classList.contains("dark")?"dark":"light";
+  localStorage.adminTheme=document.body.classList.contains("dark")?"dark":"light";
 };
 
-/* TIME */
-setInterval(()=>{
-  const now=new Date();
-  date.innerText=now.toLocaleDateString();
-  time.innerText=now.toLocaleTimeString();
-},1000);
+/* SWIPE LEFT + RIGHT → HOME SAFE */
+let sx=0,sy=0,ex=0,ey=0;
+document.addEventListener("touchstart",e=>{
+  sx=e.touches[0].clientX;
+  sy=e.touches[0].clientY;
+},{passive:true});
 
-/* PENDING REQUESTS */
-onValue(ref(db,"requests/pending"),snap=>{
-  pendingPage.innerHTML=`<div class="card"><h3>Pending Requests</h3></div>`;
-  let count=0;
-  snap.forEach(c=>{
-    count++;
-    const d=c.val();
-    pendingPage.innerHTML+=`
-      <div class="card">
-        <b>Name:</b> ${d.name}<br>
-        <b>Phone:</b> ${d.phone}<br>
-        <b>Time:</b> ${d.time}<br><br>
-        <button onclick="approveUser('${c.key}')">Approve</button>
-      </div>`;
-  });
-  pendingCount.innerText=count;
+document.addEventListener("touchmove",e=>{
+  if(Math.abs(e.touches[0].clientX-sx)>30){
+    e.preventDefault();
+  }
+},{passive:false});
+
+document.addEventListener("touchend",e=>{
+  ex=e.changedTouches[0].clientX;
+  ey=e.changedTouches[0].clientY;
+
+  const dx=ex-sx;
+  const dy=Math.abs(ey-sy);
+  if(dy>60) return;
+
+  // RIGHT → BACK
+  if(dx>80){
+    if(sidebar.classList.contains("show")){closeSidebar();return;}
+    if(!blockedBox.classList.contains("hidden")){blockedBox.classList.add("hidden");icon1.classList.remove("rotate");return;}
+    if(!totalBox.classList.contains("hidden")){totalBox.classList.add("hidden");icon2.classList.remove("rotate");return;}
+    if(document.querySelector(".page.active")?.id==="visitors"){openPage("home");history.pushState({page:"home"},"","");}
+  }
+
+  // LEFT → OPEN
+  if(dx<-80){
+    if(!sidebar.classList.contains("show")){sidebar.classList.add("show");overlay.classList.add("show");return;}
+    if(document.querySelector(".page.active")?.id==="home"){openPage("visitors");history.pushState({page:"visitors"},"","");}
+  }
 });
-
-/* APPROVE */
-window.approveUser=id=>{
-  const pRef=ref(db,"requests/pending/"+id);
-  const aRef=ref(db,"requests/approved/"+id);
-  onValue(pRef,s=>{
-    if(s.exists()){
-      set(aRef,s.val());
-      remove(pRef);
-    }
-  },{once:true});
-};
-
-/* APPROVED USERS */
-onValue(ref(db,"requests/approved"),snap=>{
-  approvedPage.innerHTML=`<div class="card"><h3>Approved Users</h3></div>`;
-  snap.forEach(c=>{
-    const d=c.val();
-    approvedPage.innerHTML+=`
-      <div class="card">
-        <b>Name:</b> ${d.name}<br>
-        <b>Phone:</b> ${d.phone}<br>
-        <b>Approved At:</b> ${d.time}<br><br>
-        <button onclick="removeUser('${c.key}')">Remove</button>
-      </div>`;
-  });
-});
-
-/* REMOVE */
-window.removeUser=id=>{
-  remove(ref(db,"requests/approved/"+id));
-};
 </script>
 
 </body>
