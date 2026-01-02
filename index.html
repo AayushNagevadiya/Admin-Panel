@@ -38,11 +38,6 @@ html,body{
 body{background:var(--bg);color:var(--text)}
 .hidden{display:none}
 
-/* 🔑 REQUIRED FOR SWIPE */
-#app{
-  touch-action:none;
-}
-
 /* LOGIN */
 .login{
   height:100vh;display:flex;align-items:center;justify-content:center;
@@ -59,6 +54,11 @@ body{background:var(--bg);color:var(--text)}
 .login-box button{
   width:100%;padding:14px;border:none;border-radius:12px;
   background:var(--accent);color:white;font-size:18px
+}
+
+/* APP */
+#app{
+  touch-action:pan-y;
 }
 
 /* SIDEBAR */
@@ -317,28 +317,19 @@ darkToggle.onchange=()=>{
 };
 
 /* ========================= */
-/* 🔥 SWIPE BACK – WORKING 🔥 */
+/* 🔥 SWIPE BACK – POINTER 🔥 */
 /* ========================= */
-let sx=0, sy=0, ex=0, ey=0;
+let sx=0, sy=0;
 const appEl=document.getElementById("app");
 
-appEl.addEventListener("touchstart",e=>{
-  sx=e.touches[0].clientX;
-  sy=e.touches[0].clientY;
-},{passive:true});
+appEl.addEventListener("pointerdown",e=>{
+  sx=e.clientX;
+  sy=e.clientY;
+});
 
-appEl.addEventListener("touchmove",e=>{
-  if(Math.abs(e.touches[0].clientX - sx)>20){
-    e.preventDefault();
-  }
-},{passive:false});
-
-appEl.addEventListener("touchend",e=>{
-  ex=e.changedTouches[0].clientX;
-  ey=e.changedTouches[0].clientY;
-
-  const dx=ex-sx;
-  const dy=Math.abs(ey-sy);
+appEl.addEventListener("pointerup",e=>{
+  const dx=e.clientX - sx;
+  const dy=Math.abs(e.clientY - sy);
   if(dy>60) return;
 
   if(dx>80){
@@ -364,5 +355,5 @@ appEl.addEventListener("touchend",e=>{
 });
 </script>
 
-</body> 
+</body>
 </html>
