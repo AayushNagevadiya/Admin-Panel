@@ -11,12 +11,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-html,body{
-  height:100%;
-  margin:0;
-  overflow:hidden;
-  font-family:system-ui;
-}
 :root{
   --bg:#f8fafc;
   --card:#ffffff;
@@ -34,8 +28,8 @@ html,body{
   --text:#e5e7eb;
   --light:#1e293b;
 }
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--text)}
+*{box-sizing:border-box;font-family:system-ui}
+body{margin:0;background:var(--bg);color:var(--text)}
 .hidden{display:none}
 
 /* LOGIN */
@@ -54,11 +48,6 @@ body{background:var(--bg);color:var(--text)}
 .login-box button{
   width:100%;padding:14px;border:none;border-radius:12px;
   background:var(--accent);color:white;font-size:18px
-}
-
-/* APP */
-#app{
-  touch-action:pan-y;
 }
 
 /* SIDEBAR */
@@ -220,30 +209,34 @@ window.login=()=>{
   if(adminId.value==="aayush" && adminPass.value==="Aayush@1982"){
     loginPage.style.display="none";
     app.classList.remove("hidden");
+    history.pushState({page:"home"},"","");
   }else alert("Invalid login");
 };
 window.logout=()=>location.reload();
+
+/* PREVENT EXIT – ALWAYS GO HOME */
+window.onpopstate=()=>{
+  openPage("home");
+  history.pushState({page:"home"},"","");
+};
 
 /* SIDEBAR */
 window.toggleSidebar=()=>{
   sidebar.classList.toggle("show");
   overlay.classList.toggle("show");
 };
-overlay.onclick=()=>toggleSidebar();
+function closeSidebar(){
+  sidebar.classList.remove("show");
+  overlay.classList.remove("show");
+}
+overlay.onclick=closeSidebar;
 
 /* NAV */
 window.openPage=id=>{
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   title.innerText=id.charAt(0).toUpperCase()+id.slice(1);
-  sidebar.classList.remove("show");
-  overlay.classList.remove("show");
-};
-
-/* TOGGLE CARD */
-window.toggleCard=(box,icon)=>{
-  document.getElementById(box).classList.toggle("hidden");
-  document.getElementById(icon).classList.toggle("rotate");
+  closeSidebar();
 };
 
 /* DATE & TIME */
@@ -251,24 +244,31 @@ setInterval(()=>{
   dateTime.innerText=new Date().toLocaleString("en-IN");
 },1000);
 
+/* TOGGLE CARD */
+window.toggleCard=(box,icon)=>{
+  document.getElementById(box).classList.toggle("hidden");
+  document.getElementById(icon).classList.toggle("rotate");
+  closeSidebar();
+};
+
 /* DATA */
 onValue(ref(db,"visitors"),snap=>{
   let total=0,blocked=0;
-  let bHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
-  let tHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
-  let aHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
+  let bHTML=<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>;
+  let tHTML=<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>;
+  let aHTML=<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>;
   let vHTML="";
   let i=1,j=1,k=1;
 
   snap.forEach(c=>{
     const d=c.val();
     total++;
-    tHTML+=`<tr><td>${j++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+    tHTML+=<tr><td>${j++}</td><td>${d.name}</td><td>${d.phone}</td></tr>;
     if(d.blocked){
       blocked++;
-      bHTML+=`<tr><td>${i++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+      bHTML+=<tr><td>${i++}</td><td>${d.name}</td><td>${d.phone}</td></tr>;
     }else{
-      aHTML+=`<tr><td>${k++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
+      aHTML+=<tr><td>${k++}</td><td>${d.name}</td><td>${d.phone}</td></tr>;
     }
 
     const dt=d.lastVisit?new Date(d.lastVisit).toLocaleString("en-IN"):"—";
@@ -289,15 +289,16 @@ onValue(ref(db,"visitors"),snap=>{
 
   blockedCount.innerText=blocked;
   totalCount.innerText=total;
-  blockedBox.innerHTML=bHTML+`</table>`;
-  totalBox.innerHTML=tHTML+`</table>`;
-  activeBox.innerHTML=aHTML+`</table>`;
+  blockedBox.innerHTML=bHTML+</table>;
+  totalBox.innerHTML=tHTML+</table>;
+  activeBox.innerHTML=aHTML+</table>;
   visitors.innerHTML=vHTML;
 });
 
 /* BLOCK / DELETE */
 window.toggleBlock=(phone,isBlocked)=>{
   update(ref(db,"visitors/"+phone),{blocked:!isBlocked});
+  closeSidebar();
 };
 window.deleteUser=phone=>{
   if(confirm("Delete user permanently?")){
@@ -316,41 +317,39 @@ darkToggle.onchange=()=>{
   localStorage.adminTheme=document.body.classList.contains("dark")?"dark":"light";
 };
 
-/* ========================= */
-/* 🔥 SWIPE BACK – POINTER 🔥 */
-/* ========================= */
-let sx=0, sy=0;
-const appEl=document.getElementById("app");
+/* SWIPE LEFT + RIGHT → HOME SAFE */
+let sx=0,sy=0,ex=0,ey=0;
+document.addEventListener("touchstart",e=>{
+  sx=e.touches[0].clientX;
+  sy=e.touches[0].clientY;
+},{passive:true});
 
-appEl.addEventListener("pointerdown",e=>{
-  sx=e.clientX;
-  sy=e.clientY;
-});
+document.addEventListener("touchmove",e=>{
+  if(Math.abs(e.touches[0].clientX-sx)>30){
+    e.preventDefault();
+  }
+},{passive:false});
 
-appEl.addEventListener("pointerup",e=>{
-  const dx=e.clientX - sx;
-  const dy=Math.abs(e.clientY - sy);
+document.addEventListener("touchend",e=>{
+  ex=e.changedTouches[0].clientX;
+  ey=e.changedTouches[0].clientY;
+
+  const dx=ex-sx;
+  const dy=Math.abs(ey-sy);
   if(dy>60) return;
 
+  // RIGHT → BACK
   if(dx>80){
-    if(sidebar.classList.contains("show")){
-      sidebar.classList.remove("show");
-      overlay.classList.remove("show");
-      return;
-    }
-    if(!blockedBox.classList.contains("hidden")){
-      blockedBox.classList.add("hidden");
-      icon1.classList.remove("rotate");
-      return;
-    }
-    if(!totalBox.classList.contains("hidden")){
-      totalBox.classList.add("hidden");
-      icon2.classList.remove("rotate");
-      return;
-    }
-    if(document.querySelector(".page.active")?.id==="visitors"){
-      openPage("home");
-    }
+    if(sidebar.classList.contains("show")){closeSidebar();return;}
+    if(!blockedBox.classList.contains("hidden")){blockedBox.classList.add("hidden");icon1.classList.remove("rotate");return;}
+    if(!totalBox.classList.contains("hidden")){totalBox.classList.add("hidden");icon2.classList.remove("rotate");return;}
+    if(document.querySelector(".page.active")?.id==="visitors"){openPage("home");history.pushState({page:"home"},"","");}
+  }
+
+  // LEFT → OPEN
+  if(dx<-80){
+    if(!sidebar.classList.contains("show")){sidebar.classList.add("show");overlay.classList.add("show");return;}
+    if(document.querySelector(".page.active")?.id==="home"){openPage("visitors");history.pushState({page:"visitors"},"","");}
   }
 });
 </script>
