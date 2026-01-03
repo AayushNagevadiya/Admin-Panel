@@ -14,7 +14,7 @@
 html,body{
   height:100%;
   margin:0;
-  overflow:hidden;
+  overflow:hidden;              /* 🔒 APP STYLE */
   font-family:system-ui;
 }
 :root{
@@ -40,20 +40,34 @@ body{background:var(--bg);color:var(--text)}
 
 /* LOGIN */
 .login{
-  height:100vh;display:flex;align-items:center;justify-content:center;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   background:linear-gradient(135deg,#60a5fa,#38bdf8)
 }
 .login-box{
-  background:var(--card);padding:40px;border-radius:20px;
-  width:90%;max-width:360px
+  background:var(--card);
+  padding:40px;
+  border-radius:20px;
+  width:90%;
+  max-width:360px
 }
 .login-box input{
-  width:100%;padding:14px;margin:10px 0;
-  border-radius:10px;border:1px solid #cbd5f5
+  width:100%;
+  padding:14px;
+  margin:10px 0;
+  border-radius:10px;
+  border:1px solid #cbd5f5
 }
 .login-box button{
-  width:100%;padding:14px;border:none;border-radius:12px;
-  background:var(--accent);color:white;font-size:18px
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:white;
+  font-size:18px
 }
 
 /* APP */
@@ -63,29 +77,52 @@ body{background:var(--bg);color:var(--text)}
 
 /* SIDEBAR */
 .sidebar{
-  position:fixed;top:0;left:0;height:100%;width:240px;
-  background:var(--panel);padding:20px;
-  transform:translateX(-100%);transition:.3s;z-index:20
+  position:fixed;
+  top:0;
+  left:0;
+  height:100%;
+  width:240px;
+  background:var(--panel);
+  padding:20px;
+  transform:translateX(-100%);
+  transition:.3s;
+  z-index:20
 }
 .sidebar.show{transform:translateX(0)}
 .sidebar button{
-  width:100%;padding:12px;margin:8px 0;border:none;
-  border-radius:12px;background:var(--light);
-  font-size:16px;text-align:left
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:12px;
+  background:var(--light);
+  font-size:16px;
+  text-align:left
 }
 .toggle{
-  margin-top:20px;padding:12px;border-radius:12px;
-  background:var(--light);display:flex;justify-content:space-between
+  margin-top:20px;
+  padding:12px;
+  border-radius:12px;
+  background:var(--light);
+  display:flex;
+  justify-content:space-between
 }
 #overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);
-  opacity:0;pointer-events:none;transition:.3s;z-index:15
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:15
 }
 #overlay.show{opacity:1;pointer-events:auto}
 
 /* TOPBAR */
 .topbar{
-  display:flex;align-items:center;gap:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
   padding:14px 16px;
   background:linear-gradient(135deg,#60a5fa,#38bdf8);
   color:white
@@ -93,40 +130,71 @@ body{background:var(--bg);color:var(--text)}
 .menu{font-size:26px;cursor:pointer}
 .topbar h3{flex:1;text-align:center;margin:0}
 
-/* PAGE */
-.page{display:none;padding:20px}
+/* ===== SCROLL FIX (ONLY CHANGE) ===== */
+.page{
+  display:none;
+  padding:20px;
+  height:calc(100vh - 56px);     /* below topbar */
+  overflow-y:auto;              /* ✅ SCROLL ENABLED */
+  -webkit-overflow-scrolling:touch;
+}
 .page.active{display:block}
 
 /* HOME CARDS */
 .stat-card{
   background:var(--light);
-  padding:18px;border-radius:18px;
-  margin-bottom:16px;cursor:pointer
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:16px;
+  cursor:pointer
 }
 .stat-head{
-  display:flex;justify-content:space-between;align-items:center
+  display:flex;
+  justify-content:space-between;
+  align-items:center
 }
-.big-num{font-size:34px;font-weight:800;color:var(--accent)}
+.big-num{
+  font-size:34px;
+  font-weight:800;
+  color:var(--accent)
+}
 .sub{opacity:.7}
 .icon{transition:.3s}
 .rotate{transform:rotate(180deg)}
 
 .table-wrap{
-  max-height:200px;overflow:auto;margin-top:12px
+  max-height:200px;
+  overflow:auto;
+  margin-top:12px
 }
-table{width:100%;border-collapse:collapse}
-th,td{padding:8px;border-bottom:1px solid #cbd5f5;font-size:14px;text-align:left}
+table{
+  width:100%;
+  border-collapse:collapse
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #cbd5f5;
+  font-size:14px;
+  text-align:left
+}
 th{font-weight:700}
 
 /* VISITORS */
+#visitors{
+  padding-bottom:80px;          /* ✅ bottom safety */
+}
 .visitor-card{
   background:var(--light);
-  padding:18px;border-radius:18px;
+  padding:18px;
+  border-radius:18px;
   margin-bottom:16px
 }
 .btn{
-  padding:6px 10px;border:none;border-radius:8px;
-  margin-right:6px;cursor:pointer
+  padding:6px 10px;
+  border:none;
+  border-radius:8px;
+  margin-right:6px;
+  cursor:pointer
 }
 .block{background:#facc15}
 .unblock{background:var(--success);color:white}
@@ -316,9 +384,7 @@ darkToggle.onchange=()=>{
   localStorage.adminTheme=document.body.classList.contains("dark")?"dark":"light";
 };
 
-/* ========================= */
-/* 🔥 SWIPE BACK – POINTER 🔥 */
-/* ========================= */
+/* SWIPE BACK */
 let sx=0, sy=0;
 const appEl=document.getElementById("app");
 
@@ -326,7 +392,6 @@ appEl.addEventListener("pointerdown",e=>{
   sx=e.clientX;
   sy=e.clientY;
 });
-
 appEl.addEventListener("pointerup",e=>{
   const dx=e.clientX - sx;
   const dy=Math.abs(e.clientY - sy);
