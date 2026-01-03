@@ -2,423 +2,326 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
-
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+<title>Admin Panel | Smart Home</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-html,body{
-  height:100%;
-  margin:0;
-  overflow:hidden;              /* 🔒 APP STYLE */
-  font-family:system-ui;
+:root {
+  --bg: #f0f7ff;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --accent: #0ea5e9;
+  --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  --text-main: #0f172a;
+  --text-sub: #64748b;
+  --glass-border: rgba(14, 165, 233, 0.2);
+  --shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15);
+  --danger: #f43f5e;
+  --success: #10b981;
 }
-:root{
-  --bg:#f8fafc;
-  --card:#ffffff;
-  --panel:#e0f2fe;
-  --text:#0f172a;
-  --accent:#3b82f6;
-  --light:#e0f2fe;
-  --danger:#ef4444;
-  --success:#22c55e;
+
+.dark {
+  --bg: #0b1120;
+  --card-bg: rgba(30, 41, 59, 0.8);
+  --text-main: #f8fafc;
+  --text-sub: #94a3b8;
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
 }
-.dark{
-  --bg:#020617;
-  --card:#0f172a;
-  --panel:#1e293b;
-  --text:#e5e7eb;
-  --light:#1e293b;
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0; font-family: 'Inter', system-ui, -apple-system;
+  background-color: var(--bg); color: var(--text-main);
+  height: 100vh; overflow: hidden; transition: 0.4s ease;
+  user-select: none;
+  /* CRITICAL: Allows vertical scroll but lets script handle horizontal swipe */
+  touch-action: pan-y; 
 }
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--text)}
-.hidden{display:none}
+
+.hidden { display: none !important; }
 
 /* LOGIN */
-.login{
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:linear-gradient(135deg,#60a5fa,#38bdf8)
+.login {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--accent-gradient);
+  display: flex; align-items: center; justify-content: center;
 }
-.login-box{
-  background:var(--card);
-  padding:40px;
-  border-radius:20px;
-  width:90%;
-  max-width:360px
+.login-box {
+  background: var(--card-bg); backdrop-filter: blur(20px);
+  padding: 40px; border-radius: 30px; width: 90%; max-width: 400px;
+  text-align: center; border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
 }
-.login-box input{
-  width:100%;
-  padding:14px;
-  margin:10px 0;
-  border-radius:10px;
-  border:1px solid #cbd5f5
+.pass-container { position: relative; width: 100%; margin: 12px 0; }
+.login-box input {
+  width: 100%; padding: 16px; border-radius: 15px;
+  border: 1px solid var(--glass-border); background: rgba(255,255,255,0.7);
+  font-size: 16px; outline: none; margin: 0;
 }
-.login-box button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:var(--accent);
-  color:white;
-  font-size:18px
+.toggle-eye {
+  position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+  cursor: pointer; color: var(--text-sub); font-size: 18px; z-index: 10;
 }
-
-/* APP */
-#app{
-  touch-action:pan-y;
+.login-box button {
+  width: 100%; padding: 16px; border: none; border-radius: 15px;
+  background: var(--accent-gradient); color: white;
+  font-size: 18px; font-weight: 600; cursor: pointer; margin-top: 12px;
 }
-
-/* SIDEBAR */
-.sidebar{
-  position:fixed;
-  top:0;
-  left:0;
-  height:100%;
-  width:240px;
-  background:var(--panel);
-  padding:20px;
-  transform:translateX(-100%);
-  transition:.3s;
-  z-index:20
-}
-.sidebar.show{transform:translateX(0)}
-.sidebar button{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border:none;
-  border-radius:12px;
-  background:var(--light);
-  font-size:16px;
-  text-align:left
-}
-.toggle{
-  margin-top:20px;
-  padding:12px;
-  border-radius:12px;
-  background:var(--light);
-  display:flex;
-  justify-content:space-between
-}
-#overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
-  z-index:15
-}
-#overlay.show{opacity:1;pointer-events:auto}
 
 /* TOPBAR */
-.topbar{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:14px 16px;
-  background:linear-gradient(135deg,#60a5fa,#38bdf8);
-  color:white
+.topbar { height: 70px; display: flex; align-items: center; padding: 0 25px; position: relative; z-index: 50; }
+.menu-icon {
+  font-size: 24px; cursor: pointer; width: 45px; height: 45px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow);
+  color: var(--accent);
 }
-.menu{font-size:26px;cursor:pointer}
-.topbar h3{flex:1;text-align:center;margin:0}
+.topbar h3 { flex: 1; text-align: center; font-weight: 700; color: var(--text-main); margin:0; }
 
-/* ===== SCROLL FIX (ONLY CHANGE) ===== */
-.page{
-  display:none;
-  padding:20px;
-  height:calc(100vh - 56px);     /* below topbar */
-  overflow-y:auto;              /* ✅ SCROLL ENABLED */
-  -webkit-overflow-scrolling:touch;
+/* SIDEBAR */
+.sidebar {
+  position: fixed; top: 0; left: 0; height: 100%; width: 280px;
+  background: var(--card-bg); backdrop-filter: blur(20px);
+  padding: 30px 20px; transform: translateX(-100%); transition: 0.4s;
+  z-index: 100; border-right: 1px solid var(--glass-border);
 }
-.page.active{display:block}
+.sidebar.show { transform: translateX(0); }
+.sidebar button {
+  width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 15px;
+  background: transparent; color: var(--text-main); font-size: 16px;
+  text-align: left; cursor: pointer;
+}
 
-/* HOME CARDS */
-.stat-card{
-  background:var(--light);
-  padding:18px;
-  border-radius:18px;
-  margin-bottom:16px;
-  cursor:pointer
+/* PAGES */
+.page { 
+  position: absolute; inset: 70px 0 0 0; padding: 20px; display: none; overflow-y: auto; 
 }
-.stat-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center
-}
-.big-num{
-  font-size:34px;
-  font-weight:800;
-  color:var(--accent)
-}
-.sub{opacity:.7}
-.icon{transition:.3s}
-.rotate{transform:rotate(180deg)}
+.page.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-.table-wrap{
-  max-height:200px;
-  overflow:auto;
-  margin-top:12px
+.card {
+  background: var(--card-bg); backdrop-filter: blur(15px);
+  padding: 25px; border-radius: 24px; margin-bottom: 20px;
+  border: 1px solid var(--glass-border); box-shadow: var(--shadow);
 }
-table{
-  width:100%;
-  border-collapse:collapse
-}
-th,td{
-  padding:8px;
-  border-bottom:1px solid #cbd5f5;
-  font-size:14px;
-  text-align:left
-}
-th{font-weight:700}
 
-/* VISITORS */
-#visitors{
-  padding-bottom:80px;          /* ✅ bottom safety */
+/* CLOCK */
+#time-now { font-size: 28px; font-weight: 300; color: var(--accent); margin: 0; letter-spacing: 1px; text-align: center; }
+#date-now { font-size: 13px; color: var(--text-sub); font-weight: 600; margin-top: 5px; text-transform: uppercase; text-align: center; }
+
+.big-num { font-size: 48px; font-weight: 900; color: var(--accent); display: block; }
+.sub-text { font-size: 14px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th { text-align: left; color: var(--text-sub); font-size: 11px; padding-bottom: 10px; text-transform: uppercase; }
+td { padding: 12px 5px; border-top: 1px solid var(--glass-border); font-weight: 600; font-size: 14px; }
+
+.btn-group { display: flex; gap: 10px; margin-top: 15px; }
+.admin-btn {
+  flex: 1; padding: 16px; border: none; border-radius: 15px;
+  font-weight: 700; cursor: pointer; font-size: 15px;
 }
-.visitor-card{
-  background:var(--light);
-  padding:18px;
-  border-radius:18px;
-  margin-bottom:16px
-}
-.btn{
-  padding:6px 10px;
-  border:none;
-  border-radius:8px;
-  margin-right:6px;
-  cursor:pointer
-}
-.block{background:#facc15}
-.unblock{background:var(--success);color:white}
-.delete{background:var(--danger);color:white}
+.btn-block { background: #facc15; color: #000; }
+.btn-unblock { background: var(--success); color: #fff; }
+.btn-delete { background: var(--danger); color: #fff; }
+
+#overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 90; }
+#overlay.show { opacity: 1; pointer-events: auto; }
 </style>
 </head>
-
 <body>
 
-<!-- LOGIN -->
 <div class="login" id="loginPage">
   <div class="login-box">
-    <h2>Admin Login</h2>
-    <input id="adminId" placeholder="Admin ID">
-    <input id="adminPass" type="password" placeholder="Password">
+    <h1>Admin Access</h1>
+    <div class="pass-container"><input id="adminId" placeholder="Admin ID"></div>
+    <div class="pass-container">
+      <input id="adminPass" type="password" placeholder="Password">
+      <i class="fa fa-eye toggle-eye" id="eyeBtn" onclick="togglePass()"></i>
+    </div>
     <button onclick="login()">Login</button>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" class="hidden">
-
-<div class="sidebar" id="sidebar">
-  <button onclick="openPage('home')">🏠 Home</button>
-  <button onclick="openPage('visitors')">👥 Visitors</button>
-  <button onclick="logout()">🚪 Logout</button>
-  <div class="toggle">
-    <span>🌙 Dark Mode</span>
-    <input type="checkbox" id="darkToggle">
+  <div class="topbar">
+    <div class="menu-icon" onclick="toggleSidebar()"><i class="fa fa-bars"></i></div>
+    <h3 id="pageTitle">Home</h3>
+    <div style="width:45px"></div>
   </div>
-</div>
-<div id="overlay"></div>
 
-<div class="topbar">
-  <span class="menu" onclick="toggleSidebar()">☰</span>
-  <h3 id="title">Home</h3>
-</div>
-
-<!-- HOME -->
-<div class="page active" id="home">
-  <h2>Hello, Aayush 👋</h2>
-  <p id="dateTime"></p>
-
-  <div class="stat-card" onclick="toggleCard('blockedBox','icon1')">
-    <div class="stat-head">
-      <div>
-        <div class="big-num" id="blockedCount">0</div>
-        <div class="sub">Blocked Users</div>
-      </div>
-      <i id="icon1" class="fa-solid fa-chevron-down icon"></i>
+  <div class="sidebar" id="sidebar">
+    <h2 style="margin-bottom:30px">Menu</h2>
+    <button onclick="openPage('home')"><i class="fa fa-home"></i> &nbsp; Home</button>
+    <button onclick="openPage('visitors')"><i class="fa fa-users"></i> &nbsp; Visitors</button>
+    <button onclick="openPage('blocked')"><i class="fa fa-user-slash"></i> &nbsp; Blocked</button>
+    <button onclick="logout()"><i class="fa fa-sign-out-alt"></i> &nbsp; Logout</button>
+    <div style="margin-top:20px; padding:15px; background:rgba(14,165,233,0.1); border-radius:15px; display:flex; justify-content:space-between">
+      <span>Dark Mode</span>
+      <input type="checkbox" id="darkToggle">
     </div>
-    <div class="table-wrap hidden" id="blockedBox"></div>
   </div>
+  <div id="overlay"></div>
 
-  <div class="stat-card" onclick="toggleCard('totalBox','icon2')">
-    <div class="stat-head">
-      <div>
-        <div class="big-num" id="totalCount">0</div>
-        <div class="sub">Total Users</div>
-      </div>
-      <i id="icon2" class="fa-solid fa-chevron-down icon"></i>
+  <div class="page active" id="home">
+    <div class="clock-hub">
+      <h1 id="time-now">00:00:00</h1>
+      <div id="date-now">...</div>
     </div>
-    <div class="table-wrap hidden" id="totalBox"></div>
+    <div class="card" style="text-align: left;">
+      <span class="sub-text">Total Users</span>
+      <span class="big-num" id="totalCount">0</span>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0"><i class="fa fa-circle" style="color:var(--success); font-size: 10px; vertical-align: middle;"></i> Active Users</h3>
+      <div id="activeBox" style="overflow-x: auto;"></div>
+    </div>
   </div>
 
-  <div class="stat-card">
-    <div class="sub">Active Users</div>
-    <div class="table-wrap" id="activeBox"></div>
+  <div class="page" id="visitors">
+    <div id="visitorBox"></div>
   </div>
-</div>
 
-<!-- VISITORS -->
-<div class="page" id="visitors"></div>
-
+  <div class="page" id="blocked">
+    <div id="blockedPageBox"></div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-import { getDatabase, ref, onValue, remove, update } from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove, update, onDisconnect }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-/* FIREBASE */
 const fb=initializeApp({
   apiKey:"AIzaSyAht7TWN8NlbICl0VbEIuc19Mri7oPlXvc",
   databaseURL:"https://home-automation-89830-default-rtdb.firebaseio.com"
 });
 const db=getDatabase(fb);
 
-/* LOGIN */
+let visitorMap = {};
+const pages = ['home', 'visitors', 'blocked'];
+let currentIdx = 0;
+
+/* REFINED SWIPE LOGIC */
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, {passive: false});
+
+document.addEventListener('touchend', (e) => {
+    if (!loginPage.classList.contains('hidden') || sidebar.classList.contains('show')) return;
+
+    let touchEndX = e.changedTouches[0].clientX;
+    let touchEndY = e.changedTouches[0].clientY;
+
+    let dx = touchStartX - touchEndX;
+    let dy = touchStartY - touchEndY;
+
+    // Must be a horizontal swipe (dx > dy) and at least 60px distance
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+        if (dx > 0) {
+            // Swipe Left -> Next Page
+            if(currentIdx < pages.length - 1) openPage(pages[currentIdx + 1]);
+        } else {
+            // Swipe Right -> Prev Page (Back to Home)
+            if(currentIdx > 0) openPage(pages[currentIdx - 1]);
+        }
+    }
+}, {passive: false});
+
+window.togglePass = () => {
+  const p = document.getElementById('adminPass');
+  const e = document.getElementById('eyeBtn');
+  p.type = p.type === 'password' ? 'text' : 'password';
+  e.classList.toggle('fa-eye');
+  e.classList.toggle('fa-eye-slash');
+};
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById("time-now").innerText = now.toLocaleTimeString([], { hour12: true });
+  document.getElementById("date-now").innerText = now.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+}
+setInterval(updateClock, 1000); updateClock();
+
 window.login=()=>{
   if(adminId.value==="aayush" && adminPass.value==="Aayush@1982"){
-    loginPage.style.display="none";
-    app.classList.remove("hidden");
-  }else alert("Invalid login");
+    loginPage.classList.add("hidden"); app.classList.remove("hidden");
+    const ar=ref(db,"activeUsers/admin_aayush");
+    set(ar,{name:"Aayush (Admin)"}); onDisconnect(ar).remove();
+  } else alert("Invalid Login");
 };
-window.logout=()=>location.reload();
 
-/* SIDEBAR */
-window.toggleSidebar=()=>{
-  sidebar.classList.toggle("show");
-  overlay.classList.toggle("show");
-};
-overlay.onclick=()=>toggleSidebar();
+window.logout=()=> remove(ref(db,"activeUsers/admin_aayush")).then(()=>location.reload());
 
-/* NAV */
-window.openPage=id=>{
+window.openPage=(id)=>{
+  currentIdx = pages.indexOf(id);
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  title.innerText=id.charAt(0).toUpperCase()+id.slice(1);
-  sidebar.classList.remove("show");
-  overlay.classList.remove("show");
+  document.getElementById("pageTitle").innerText = id.charAt(0).toUpperCase() + id.slice(1);
+  sidebar.classList.remove("show"); overlay.classList.remove("show");
+  document.getElementById(id).scrollTop = 0;
 };
 
-/* TOGGLE CARD */
-window.toggleCard=(box,icon)=>{
-  document.getElementById(box).classList.toggle("hidden");
-  document.getElementById(icon).classList.toggle("rotate");
+window.toggleSidebar=()=>{
+  sidebar.classList.toggle("show"); overlay.classList.toggle("show");
 };
+document.getElementById("overlay").onclick=window.toggleSidebar;
 
-/* DATE & TIME */
-setInterval(()=>{
-  dateTime.innerText=new Date().toLocaleString("en-IN");
-},1000);
-
-/* DATA */
 onValue(ref(db,"visitors"),snap=>{
-  let total=0,blocked=0;
-  let bHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
-  let tHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
-  let aHTML=`<table><tr><th>No</th><th>Name</th><th>Phone</th></tr>`;
-  let vHTML="";
-  let i=1,j=1,k=1;
-
+  let total=0, visitorsHTML="", blockedHTML="", bCount=0;
+  visitorMap = {}; 
   snap.forEach(c=>{
-    const d=c.val();
-    total++;
-    tHTML+=`<tr><td>${j++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
-    if(d.blocked){
-      blocked++;
-      bHTML+=`<tr><td>${i++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
-    }else{
-      aHTML+=`<tr><td>${k++}</td><td>${d.name}</td><td>${d.phone}</td></tr>`;
-    }
-
-    const dt=d.lastVisit?new Date(d.lastVisit).toLocaleString("en-IN"):"—";
-
-    vHTML+=`
-      <div class="visitor-card">
-        <b>${d.name}</b> (${d.phone})<br>
-        Visits: ${d.visits||1}<br>
-        Last Visit: ${dt}<br>
-        Status: ${d.blocked?"Blocked":"Active"}<br><br>
-        <button class="btn ${d.blocked?'unblock':'block'}"
-          onclick="toggleBlock('${d.phone}',${d.blocked})">
-          ${d.blocked?'Unblock':'Block'}
-        </button>
-        <button class="btn delete" onclick="deleteUser('${d.phone}')">Delete</button>
+    const d=c.val(); visitorMap[c.key] = d.name; total++;
+    const dt = d.lastVisit ? new Date(d.lastVisit).toLocaleString("en-IN") : "No History";
+    
+    const card=`
+      <div class="card">
+        <h3 style="margin-bottom:10px">${d.name}</h3>
+        <div style="font-size:14px; color:var(--text-sub); line-height: 1.6;">
+          <div><i class="fa fa-phone" style="width:20px"></i> ${d.phone}</div>
+          <div><i class="fa fa-history" style="width:20px"></i> Total Visits: ${d.visits||1}</div>
+          <div><i class="fa fa-clock" style="width:20px"></i> Last seen: ${dt}</div>
+        </div>
+        <div class="btn-group">
+          <button class="admin-btn ${d.blocked?'btn-unblock':'btn-block'}" onclick="toggleBlock('${d.phone}',${d.blocked})">
+            ${d.blocked?'Unblock':'Block'}
+          </button>
+          <button class="admin-btn btn-delete" onclick="deleteUser('${d.phone}')">Delete</button>
+        </div>
       </div>`;
+    if(d.blocked){ bCount++; blockedHTML+=card; } else visitorsHTML+=card;
   });
-
-  blockedCount.innerText=blocked;
   totalCount.innerText=total;
-  blockedBox.innerHTML=bHTML+`</table>`;
-  totalBox.innerHTML=tHTML+`</table>`;
-  activeBox.innerHTML=aHTML+`</table>`;
-  visitors.innerHTML=vHTML;
+  visitorBox.innerHTML=visitorsHTML || "<p>No users</p>";
+  blockedPageBox.innerHTML = bCount===0 ? "<p>No blocked users</p>" : blockedHTML;
 });
 
-/* BLOCK / DELETE */
-window.toggleBlock=(phone,isBlocked)=>{
-  update(ref(db,"visitors/"+phone),{blocked:!isBlocked});
-};
-window.deleteUser=phone=>{
-  if(confirm("Delete user permanently?")){
-    remove(ref(db,"visitors/"+phone));
-    remove(ref(db,"users/"+phone));
-  }
-};
+onValue(ref(db,"activeUsers"),snap=>{
+  if(!snap.exists()) { activeBox.innerHTML = "<p style='text-align:center; opacity:0.5'>No active users</p>"; return; }
+  let h="<table><thead><tr><th>No</th><th>Name</th><th>Phone Number</th></tr></thead><tbody>", i=1;
+  snap.forEach(c => {
+    const phone = c.key; 
+    const name = c.val().name || visitorMap[phone] || "Unknown User";
+    h += `<tr><td>${i++}</td><td>${name}</td><td style="color:var(--accent)">${phone.includes('admin') ? '---' : phone}</td></tr>`;
+  });
+  activeBox.innerHTML=h+"</tbody></table>";
+});
 
-/* DARK MODE */
-if(localStorage.adminTheme==="dark"){
-  document.body.classList.add("dark");
-  darkToggle.checked=true;
-}
-darkToggle.onchange=()=>{
+window.toggleBlock=(p,b)=>update(ref(db,"visitors/"+p),{blocked:!b});
+window.deleteUser=p=>confirm("Delete user?") && remove(ref(db,"visitors/"+p));
+
+document.getElementById("darkToggle").onchange=()=>{
   document.body.classList.toggle("dark");
-  localStorage.adminTheme=document.body.classList.contains("dark")?"dark":"light";
+  localStorage.theme=document.body.classList.contains("dark")?"dark":"light";
 };
-
-/* SWIPE BACK */
-let sx=0, sy=0;
-const appEl=document.getElementById("app");
-
-appEl.addEventListener("pointerdown",e=>{
-  sx=e.clientX;
-  sy=e.clientY;
-});
-appEl.addEventListener("pointerup",e=>{
-  const dx=e.clientX - sx;
-  const dy=Math.abs(e.clientY - sy);
-  if(dy>60) return;
-
-  if(dx>80){
-    if(sidebar.classList.contains("show")){
-      sidebar.classList.remove("show");
-      overlay.classList.remove("show");
-      return;
-    }
-    if(!blockedBox.classList.contains("hidden")){
-      blockedBox.classList.add("hidden");
-      icon1.classList.remove("rotate");
-      return;
-    }
-    if(!totalBox.classList.contains("hidden")){
-      totalBox.classList.add("hidden");
-      icon2.classList.remove("rotate");
-      return;
-    }
-    if(document.querySelector(".page.active")?.id==="visitors"){
-      openPage("home");
-    }
-  }
-});
+if(localStorage.theme==="dark") { document.body.classList.add("dark"); document.getElementById("darkToggle").checked = true; }
 </script>
-
 </body>
 </html>
